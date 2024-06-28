@@ -5,8 +5,8 @@ from google.cloud import storage
 import pandas as pd
 import io
 
-app = Flask(__name__, static_folder='client/build')
-# CORS(app)
+app = Flask(__name__)
+cors = CORS(app, origins='*')
 
 # Initialize GCP storage client
 storage_client = storage.Client()
@@ -43,7 +43,7 @@ def get_file_content(filename):
     df = pd.read_csv(io.BytesIO(content))
     return jsonify(df.to_dict(orient='records'))
 
-@app.route('/download/<filename>')
+@app.route('/api/download/<filename>')
 def download_file(filename):
     bucket_name = 'cooldowns2'
     storage_client = storage.Client()
@@ -61,5 +61,5 @@ def download_file(filename):
     else:
         return "File not found", 404
 
-# if __name__ == '__main__':
-#     app.run(use_reloader=True, port=8000, threaded=True)
+if __name__ == '__main__':
+    app.run(use_reloader=True, port=8000, threaded=True)

@@ -3,7 +3,23 @@ env_variables:
 
 runtime: python311
 
-instance_class: F4
+# runtime: nodejs22  # or whichever Node.js version you're using
+# env: standard
+
+# instance_class: F4
+
+# handlers:
+# - url: /static
+#   static_dir: build/static
+
+# - url: /(.*\.(json|ico|js))$
+#   static_files: build/\1
+#   upload: build/.*\.(json|ico|js)$
+
+# - url: .*
+#   static_files: build/index.html
+#   upload: build/index.html
+
 
 # Specify the maximum number of instances
 automatic_scaling:
