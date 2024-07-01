@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import cod3xLogo from './assets/cod3x.jpg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import axios from 'axios'
 
