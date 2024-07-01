@@ -1,14 +1,17 @@
 env_variables:
-  GOOGLE_APPLICATION_CREDENTIALS: "fast-web-419215-35d284e06546.json"
+  VITE_API_URL: "https://api-dot-internal-website-427620.uc.r.appspot.com"
 
-runtime: nodejs16
+service: frontend
+runtime: nodejs18
+entrypoint: node server.js
+
 handlers:
 - url: /(.*\..+)$
-  static_files: build/\1
-  upload: build/(.*\..+)$
+  static_files: dist/\1
+  upload: dist/(.*\..+)$
 - url: /.*
-  static_files: build/index.html
-  upload: build/index.html
+  static_files: dist/index.html
+  upload: dist/index.html
 
 instance_class: F4
 

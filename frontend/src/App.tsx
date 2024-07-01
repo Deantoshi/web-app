@@ -4,6 +4,14 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import axios from 'axios'
 
+// const config = {
+//   API_URL: import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// }
+
+// const API_URL = "https://api-dot-internal-website-427620.uc.r.appspot.com";
+
+const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
+
 function App() {
 
   const [csvFiles, setCsvFiles] = useState<string[]>([]);
@@ -11,11 +19,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
+
   const fetchAPI = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("http://127.0.0.1:8000/api/files");
+      console.log('Fetching from:', `${api_url}/api/files`);  // Add this line
+      const response = await axios.get(`${api_url}/api/files`);
       setCsvFiles(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -42,7 +53,7 @@ function App() {
     setIsDownloading(true);
   
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/download/${selectedFile}`, {
+      const response = await axios.get(`${api_url}/api/download/${selectedFile}`, {
         responseType: 'blob',
       });
   
@@ -64,11 +75,8 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={cod3xLogo} className="logo react" alt="React logo" />
+        <a href="https://www.cod3x.org/" target="_blank">
+          <img src={cod3xLogo} className="logo cod3x-logo" alt="Cod3x logo" />
         </a>
       </div>
       <h1>MRP Hub</h1>

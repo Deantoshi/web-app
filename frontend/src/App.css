@@ -33,6 +33,12 @@
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .cod3x-logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
 .card {
   padding: 2em;
 }

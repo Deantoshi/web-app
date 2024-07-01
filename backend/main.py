@@ -2,14 +2,18 @@ from flask import Flask, send_from_directory, send_file, make_response, jsonify,
 from flask_cors import CORS
 import os
 from google.cloud import storage
+from google.auth import default
 import pandas as pd
 import io
+
+KEYWORDS = ['aurelius', 'metis', 'ironclad']
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 
 # Initialize GCP storage client
-storage_client = storage.Client()
+credentials, project = default()
+storage_client = storage.Client(credentials=credentials, project=project)
 
 @app.route('/api/data')
 def get_data():
@@ -30,7 +34,10 @@ def get_files():
     bucket = storage_client.get_bucket(bucket_name)
     blobs = bucket.list_blobs()
     
-    csv_files = [blob.name for blob in blobs if blob.name.endswith('.csv')]
+    csv_files = [blob.name for blob in blobs 
+                 if blob.name.endswith('.csv')
+                 and any(keyword.lower() in blob.name.lower() for keyword in KEYWORDS)]
+
     return jsonify(csv_files)
 
 @app.route('/api/file/<filename>')
