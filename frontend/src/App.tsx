@@ -1,17 +1,11 @@
+// App.tsx (or FileDownloader.tsx)
 import { useState, useEffect } from 'react'
 import cod3xLogo from './assets/cod3x.jpg'
 import './App.css'
 import axios from 'axios'
+import RevenueChart from './RevenueChart';
 
-// const config = {
-//   API_URL: import.meta.env.VITE_API_URL || 'http://localhost:8000'
-// }
-
-// const API_URL = "https://api-dot-internal-website-427620.uc.r.appspot.com";
-
-const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
-
-// const api_url = 'http://localhost:8000';
+const api_url = 'http://localhost:8000';
 
 interface FileData {
   filename: string;
@@ -49,13 +43,12 @@ function FileDownloader() {
         const response = await axios.get<FileData>(`${api_url}/api/download/${selectedFile}`);
         const { signedUrl } = response.data;
         
-        // Create a temporary anchor element
         const link = document.createElement('a');
         link.href = signedUrl;
-        link.setAttribute('download', selectedFile); // Set the filename
+        link.setAttribute('download', selectedFile);
         document.body.appendChild(link);
-        link.click(); // Programmatically click the link to start the download
-        document.body.removeChild(link); // Clean up
+        link.click();
+        document.body.removeChild(link);
       } catch (error) {
         console.error('Error fetching signed URL:', error);
         alert('Failed to initiate download. Please try again.');
@@ -67,43 +60,44 @@ function FileDownloader() {
 
   return (
     <>
-    <div>
-    <a href="https://www.cod3x.org/" target="_blank">
-      <img src={cod3xLogo} className="logo cod3x-logo" alt="Cod3x logo" />
-    </a>
-  </div>
-  <h1>MRP Hub</h1>
+      <div>
+        <a href="https://www.cod3x.org/" target="_blank">
+          <img src={cod3xLogo} className="logo cod3x-logo" alt="Cod3x logo" />
+        </a>
+      </div>
+      <h1>MRP Hub</h1>
 
-    <div className="file-dropdown-container">
-      <h1>Select a file to download:</h1>
-      {isLoadingFiles ? (
-        <p>Loading files...</p>
-      ) : (
-        <>
-          <select 
-            className="file-dropdown"
-            value={selectedFile} 
-            onChange={handleFileSelect}
-            disabled={isLoading}
-          >
-            <option value="">Select a file</option>
-            {files.map(file => (
-              <option key={file} value={file}>
-                {file}
-              </option>
-            ))}
-          </select>
-          <button 
-            className={`download-button ${isLoading ? 'downloading' : ''}`}
-            onClick={handleDownload} 
-            disabled={!selectedFile || isLoading}
-          >
-            {isLoading ? 'Initiating Download...' : 'Download'}
-          </button>
-          {isLoading && <div className="download-animation"></div>}
-        </>
-      )}
-    </div>
+      <div className="file-dropdown-container">
+        <h1>Select a file to download:</h1>
+        {isLoadingFiles ? (
+          <p>Loading files...</p>
+        ) : (
+          <>
+            <select 
+              className="file-dropdown"
+              value={selectedFile} 
+              onChange={handleFileSelect}
+              disabled={isLoading}
+            >
+              <option value="">Select a file</option>
+              {files.map(file => (
+                <option key={file} value={file}>
+                  {file}
+                </option>
+              ))}
+            </select>
+            <button 
+              className={`download-button ${isLoading ? 'downloading' : ''}`}
+              onClick={handleDownload} 
+              disabled={!selectedFile || isLoading}
+            >
+              {isLoading ? 'Initiating Download...' : 'Download'}
+            </button>
+            {isLoading && <div className="download-animation"></div>}
+          </>
+        )}
+      </div>
+      <RevenueChart />
     </>
   );
 }

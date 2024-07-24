@@ -7,21 +7,23 @@ from google.auth import default
 from google.oauth2 import service_account
 import pandas as pd
 import io
+from io import BytesIO
 import logging
 import time
 import zipfile
 import datetime
+import csv
 
 # logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 
-KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'icl']
+KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum']
 
 app = Flask(__name__)
-# cors = CORS(app, origins='*')
-CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
+cors = CORS(app, origins='*')
+# CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
 
 # Initialize GCP storage client
 credentials, project = default()
@@ -116,6 +118,113 @@ def get_signed_url(filename):
     blob = bucket.blob(filename)
     url = blob.generate_signed_url(expiration=900)  # 15 minutes
     return jsonify({"filename": filename, "signedUrl": url})
+
+def extract_data_from_zip(zip_file):
+    data = []
+    with zipfile.ZipFile(zip_file, 'r') as z:
+        for filename in z.namelist():
+            if filename.endswith('.csv'):
+                with z.open(filename) as f:
+                    csv_reader = csv.DictReader(f.read().decode('utf-8').splitlines())
+                    for row in csv_reader:
+                        data.append({
+                            'day': row['day'],
+                            'total_revenue': float(row['total_revenue'])
+                        })
+    return data
+
+@app.route('/api/data/<filename>', methods=['GET'])
+def get_zip_data(filename):
+    bucket_name = 'cooldowns2'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+
+    # List all blobs in the bucket
+    blobs = bucket.list_blobs()
+
+    # Filter blobs that contain 'lend_revenue' and match the given filename
+    matching_blobs = [blob for blob in blobs if 'lend_revenue' in blob.name.lower() and filename in blob.name]
+
+    if not matching_blobs:
+        return jsonify({'error': 'File not found'}), 404
+
+    # Use the first matching blob
+    blob = matching_blobs[0]
+
+    # Download the content of the zip file
+    zip_content = blob.download_as_bytes()
+
+    data = []
+    with zipfile.ZipFile(BytesIO(zip_content)) as z:
+        for zip_filename in z.namelist():
+            if zip_filename.endswith('.csv'):
+                with z.open(zip_filename) as f:
+                    csv_reader = csv.DictReader(io.TextIOWrapper(f, 'utf-8'))
+                    for row in csv_reader:
+                        data.append({
+                            'day': row['day'],
+                            'total_revenue': float(row['total_revenue'])
+                        })
+
+    return jsonify(data)
+
+def format_currency(amount):
+    return "${:,.2f}".format(float(amount))
+
+@app.route('/api/all_revenue_data', methods=['GET'])
+def get_all_revenue_data():
+    bucket_name = 'cooldowns2'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+
+    # List all blobs in the bucket
+    blobs = bucket.list_blobs()
+
+    # Filter blobs that contain 'lend_revenue'
+    lend_revenue_blobs = [blob for blob in blobs if 'lend_revenue' in blob.name.lower()]
+    
+    if not lend_revenue_blobs:
+        return jsonify({'error': 'File not found'}), 404
+
+    all_data = {}
+
+    for blob in lend_revenue_blobs:
+        # Download the content of the file
+        content = blob.download_as_bytes()
+
+        data = []
+        try:
+            # Try to open as a zip file
+            with zipfile.ZipFile(io.BytesIO(content)) as z:
+                for zip_filename in z.namelist():
+                    if zip_filename.endswith('.csv'):
+                        with z.open(zip_filename) as f:
+                            csv_reader = csv.DictReader(io.TextIOWrapper(f, 'utf-8'))
+                            for row in csv_reader:
+                                data.append({
+                                    'day': row['day'],
+                                    'total_revenue': format_currency(float(row['total_revenue'])),
+                                    '7_days_ma_revenue': row['7_days_ma_revenue'],
+                                    '30_days_ma_revenue': row['30_days_ma_revenue'],
+                                    '90_days_ma_revenue': row['90_days_ma_revenue'],
+                                    '180_days_ma_revenue': row['180_days_ma_revenue']
+                                })
+        except zipfile.BadZipFile:
+            # If it's not a zip file, assume it's a CSV
+            csv_reader = csv.DictReader(io.StringIO(content.decode('utf-8')))
+            for row in csv_reader:
+                data.append({
+                    'day': row['day'],
+                    'total_revenue': format_currency(float(row['total_revenue'])),
+                    '7_days_ma_revenue': row['7_days_ma_revenue'],
+                    '30_days_ma_revenue': row['30_days_ma_revenue'],
+                    '90_days_ma_revenue': row['90_days_ma_revenue'],
+                    '180_days_ma_revenue': row['180_days_ma_revenue']
+                })
+        
+        all_data[blob.name] = data
+
+    return jsonify(all_data)
 
 if __name__ == '__main__':
     app.run(use_reloader=True, port=8000, threaded=True, DEBUG=True)
