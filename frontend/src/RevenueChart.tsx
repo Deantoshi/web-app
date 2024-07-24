@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 interface ChartData {
   day: string;
@@ -14,14 +15,14 @@ interface ChartData {
 
 const api_url = 'http://localhost:8000';
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="custom-tooltip" style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc' }}>
-        <p>{`Day: ${label}`}</p>
+      <div className="custom-tooltip" style={{ backgroundColor: 'gray', padding: '10px', border: '1px solid #ccc' }}>
+        <p style={{ margin: '0 0 5px', fontWeight: 'bold' }}>{`Date: ${label}`}</p>
         {payload.map((entry, index) => (
-          <p key={index} style={{ color: entry.color }}>
-            {`${entry.name}: ${entry.value !== undefined ? formatCurrency(entry.value) : 'N/A'}`}
+          <p key={index} style={{ color: entry.color, margin: '2px 0' }}>
+            {`${entry.name}: ${entry.value !== undefined && entry.value !== null ? formatCurrency(Number(entry.value)) : 'N/A'}`}
           </p>
         ))}
       </div>
@@ -59,11 +60,11 @@ const RevenueChart: React.FC = () => {
   };
 
   const lineColors = {
-    total_revenue: "#8884d8",
-    "7_days_ma_revenue": "#82ca9d",
-    "30_days_ma_revenue": "#ffc658",
-    "90_days_ma_revenue": "#ff7300",
-    "180_days_ma_revenue": "#a4de6c"
+    total_revenue: "#80ed99",
+    "7_days_ma_revenue": "#fcf6bd",
+    "30_days_ma_revenue": "#ff99c8",
+    "90_days_ma_revenue": "#a9def9",
+    "180_days_ma_revenue": "#e4c1f9"
   };
 
   const trimData = (data: ChartData[]) => {
