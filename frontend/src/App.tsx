@@ -4,6 +4,7 @@ import cod3xLogo from './assets/cod3x.jpg'
 import './App.css'
 import axios from 'axios'
 import RevenueChart from './RevenueChart';
+import TokenRevenuePieChart from './TokenRevenuePieChart';
 
 const api_url = 'http://localhost:8000';
 
@@ -68,7 +69,7 @@ function FileDownloader() {
       <h1>MRP Hub</h1>
 
       <div className="file-dropdown-container">
-        <h1>Select a file to download:</h1>
+        <h2>Select a file to download:</h2>
         {isLoadingFiles ? (
           <p>Loading files...</p>
         ) : (
@@ -97,6 +98,12 @@ function FileDownloader() {
           </>
         )}
       </div>
+      <h2>Revenue Charts</h2>
+      <h3>Revenue Per Token</h3>
+      <div className="App">
+        <TokenRevenuePieChart />
+      </div>
+
       <RevenueChart />
     </>
   );

@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 
 
-KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum']
+KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum', 'aggregate']
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
@@ -220,6 +220,54 @@ def get_all_revenue_data():
                     '30_days_ma_revenue': row['30_days_ma_revenue'],
                     '90_days_ma_revenue': row['90_days_ma_revenue'],
                     '180_days_ma_revenue': row['180_days_ma_revenue']
+                })
+        
+        all_data[blob.name] = data
+
+    return jsonify(all_data)
+
+# # gets the data for our token_revenue pie chart
+@app.route('/api/token_revenue_data', methods=['GET'])
+def get_token_revenue_data():
+    bucket_name = 'cooldowns2'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+
+    # List all blobs in the bucket
+    blobs = bucket.list_blobs()
+
+    # Filter blobs that contain 'token_revenue'
+    token_revenue_blobs = [blob for blob in blobs if 'revenue_per_token' in blob.name.lower()]
+    
+    if not token_revenue_blobs:
+        return jsonify({'error': 'File not found'}), 404
+
+    all_data = {}
+
+    for blob in token_revenue_blobs:
+        # Download the content of the file
+        content = blob.download_as_bytes()
+
+        data = []
+        try:
+            # Try to open as a zip file
+            with zipfile.ZipFile(io.BytesIO(content)) as z:
+                for zip_filename in z.namelist():
+                    if zip_filename.endswith('.csv'):
+                        with z.open(zip_filename) as f:
+                            csv_reader = csv.DictReader(io.TextIOWrapper(f, 'utf-8'))
+                            for row in csv_reader:
+                                data.append({
+                                    'token_name': row['token_name'],
+                                    'token_revenue': float(row['token_revenue'])
+                                })
+        except zipfile.BadZipFile:
+            # If it's not a zip file, assume it's a CSV
+            csv_reader = csv.DictReader(io.StringIO(content.decode('utf-8')))
+            for row in csv_reader:
+                data.append({
+                    'token_name': row['token_name'],
+                    'token_revenue': float(row['token_revenue'])
                 })
         
         all_data[blob.name] = data

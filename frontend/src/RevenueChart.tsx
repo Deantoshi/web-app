@@ -82,7 +82,7 @@ const RevenueChart: React.FC = () => {
 
   return (
     <div className="revenue-charts">
-      <h2>Revenue Charts</h2>
+      
       {Object.entries(allData).map(([filename, rawData]) => {
         const data = trimData(rawData);
         return (
