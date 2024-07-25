@@ -97,7 +97,15 @@ const RevenueChart: React.FC = () => {
                   allowDataOverflow={false}
                 />
                 <YAxis 
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  tickFormatter={(value) => {
+                    if (value >= 1000000) {
+                      return `$${(value / 1000000).toFixed(1)}M`;
+                    } else if (value >= 1000) {
+                      return `$${(value / 1000).toFixed(1)}K`;
+                    } else {
+                      return `$${value}`;
+                    }
+                  }}
                   domain={['dataMin', 'dataMax']}
                   scale="linear"
                 />
