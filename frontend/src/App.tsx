@@ -5,6 +5,7 @@ import './App.css'
 import axios from 'axios'
 import RevenueChart from './RevenueChart';
 import TokenRevenuePieChart from './TokenRevenuePieChart';
+import RevenueCards from './RevenueCards';
 
 const api_url = 'http://localhost:8000';
 
@@ -98,13 +99,18 @@ function FileDownloader() {
           </>
         )}
       </div>
+      <h2>Revenue Summary Data</h2>
+      <div className="App">
+        <RevenueCards />
+      </div>
       <h2>Revenue Charts</h2>
       <h3>Revenue Per Token</h3>
-      <div className="App">
+      <div>
         <TokenRevenuePieChart />
       </div>
-
+      <div>
       <RevenueChart />
+      </div>
     </>
   );
 }

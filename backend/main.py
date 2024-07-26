@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum', 'aggregate']
 
 app = Flask(__name__)
-cors = CORS(app, origins='*')
-# CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
+# cors = CORS(app, origins='*')
+CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
 
 # Initialize GCP storage client
 credentials, project = default()
@@ -181,7 +181,7 @@ def get_all_revenue_data():
     blobs = bucket.list_blobs()
 
     # Filter blobs that contain 'lend_revenue'
-    lend_revenue_blobs = [blob for blob in blobs if 'lend_revenue' in blob.name.lower()]
+    lend_revenue_blobs = [blob for blob in blobs if '_lend_revenue' in blob.name.lower()]
     
     if not lend_revenue_blobs:
         return jsonify({'error': 'File not found'}), 404
@@ -271,6 +271,43 @@ def get_token_revenue_data():
                 })
         
         all_data[blob.name] = data
+
+    return jsonify(all_data)
+
+
+@app.route('/api/revenue_card_data', methods=['GET'])
+def get_revenue_card_data():
+    bucket_name = 'cooldowns2'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+
+    # List all blobs in the bucket
+    blobs = bucket.list_blobs()
+
+    # Filter blobs that contain your specific file name
+    revenue_blobs = [blob for blob in blobs if 'lend_revenue_data_card' in blob.name.lower()]
+    
+    if not revenue_blobs:
+        return jsonify({'error': 'File not found'}), 404
+
+    all_data = {}
+
+    for blob in revenue_blobs:
+        # Download the content of the file
+        content = blob.download_as_bytes()
+
+        try:
+            # Try to open as a zip file
+            with zipfile.ZipFile(io.BytesIO(content)) as z:
+                for zip_filename in z.namelist():
+                    if zip_filename.endswith('.csv'):
+                        with z.open(zip_filename) as f:
+                            csv_reader = csv.DictReader(io.TextIOWrapper(f, 'utf-8'))
+                            all_data = list(csv_reader)
+        except zipfile.BadZipFile:
+            # If it's not a zip file, assume it's a CSV
+            csv_reader = csv.DictReader(io.StringIO(content.decode('utf-8')))
+            all_data = list(csv_reader)
 
     return jsonify(all_data)
 

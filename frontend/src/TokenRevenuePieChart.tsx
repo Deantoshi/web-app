@@ -8,7 +8,7 @@ interface TokenRevenueData {
   token_revenue: number;
 }
 
-const api_url = 'http://localhost:8000';
+const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
 
 const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -118,7 +118,7 @@ const TokenRevenuePieChart: React.FC = () => {
   };
 
   return (
-    <div style={{ width: 800, height: 275 }}>
+    <div style={{ width: '100%', height: 275 }}>
     <ResponsiveContainer>
         <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
         <Pie
