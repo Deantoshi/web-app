@@ -6,6 +6,7 @@ import axios from 'axios'
 import RevenueChart from './RevenueChart';
 import TokenRevenuePieChart from './TokenRevenuePieChart';
 import RevenueCards from './RevenueCards';
+import DeploymentRevenueChart from './DeploymentRevenueChart';
 
 const api_url = 'http://localhost:8000';
 
@@ -107,6 +108,10 @@ function FileDownloader() {
       <h3>Revenue Per Token</h3>
       <div>
         <TokenRevenuePieChart />
+      </div>
+      <h2>Cumulative Revenue Per Deployment</h2>
+      <div>
+        <DeploymentRevenueChart />
       </div>
       <div>
       <RevenueChart />
