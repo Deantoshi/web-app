@@ -4,9 +4,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 const api_url = 'http://localhost:8000';
 
-interface DeploymentData {
+interface MARevenueData {
   day: string;
-  total_aggregate_revenue: number;
+  total_7_days_ma_revenue: number;
   [key: string]: string | number;
 }
 
@@ -14,28 +14,32 @@ interface VisibleLines {
   [key: string]: boolean;
 }
 
-const DeploymentRevenueChart: React.FC = () => {
-  const [chartData, setChartData] = useState<DeploymentData[]>([]);
+const SevenDayMARevenueChart: React.FC = () => {
+  const [chartData, setChartData] = useState<MARevenueData[]>([]);
   const [deployments, setDeployments] = useState<string[]>([]);
   const [visibleLines, setVisibleLines] = useState<VisibleLines>({});
 
   useEffect(() => {
-    axios.get<DeploymentData[]>(`${api_url}/api/deployment_revenue`)
+    axios.get<MARevenueData[]>(`${api_url}/api/7_days_ma_revenue`)
       .then(response => {
         setChartData(response.data);
         const allDeployments = new Set(
-          response.data.flatMap(entry => Object.keys(entry).filter(key => key !== 'day' && key !== 'total_aggregate_revenue'))
+          response.data.flatMap(entry => 
+            Object.keys(entry).filter(key => 
+              key !== 'day' && key !== 'total_7_days_ma_revenue' && key.endsWith('_7_days_ma_revenue')
+            )
+          )
         );
-        const deploymentsList = Array.from(allDeployments);
+        const deploymentsList = Array.from(allDeployments).map(key => key.replace('_7_days_ma_revenue', ''));
         setDeployments(deploymentsList);
         
         const initialVisibility: VisibleLines = deploymentsList.reduce((acc, deployment) => {
           acc[deployment] = true;
           return acc;
-        }, { total_aggregate_revenue: true } as VisibleLines);
+        }, { total_7_days_ma_revenue: true } as VisibleLines);
         setVisibleLines(initialVisibility);
       })
-      .catch(error => console.error('Error fetching deployment revenue data:', error));
+      .catch(error => console.error('Error fetching MA revenue data:', error));
   }, []);
 
   const colors = [
@@ -44,17 +48,23 @@ const DeploymentRevenueChart: React.FC = () => {
   ];
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
+  
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip" style={{ backgroundColor: '#404040', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}>
           <p style={{ margin: '0 0 5px', fontWeight: 'bold', color: 'white' }}>{`Date: ${label}`}</p>
-          {payload.map((pld: any, index: number) => (
-            <p key={index} style={{ color: pld.color, margin: '2px 0'}}>
-              {`${capitalize(pld.name.replace('_', ' '))}: $${Number(pld.value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
-            </p>
-          ))}
+          {payload.map((pld: any, index: number) => {
+            let displayName = pld.name;
+            if (displayName !== 'Total 7 Days MA Revenue') {
+              displayName = displayName.replace('7 Days MA Revenue', '').trim();
+            }
+            return (
+              <p key={index} style={{ color: pld.color, margin: '2px 0'}}>
+                {`${capitalize(displayName)}: $${Number(pld.value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+              </p>
+            );
+          })}
         </div>
       );
     }
@@ -69,7 +79,7 @@ const DeploymentRevenueChart: React.FC = () => {
   };
 
   const CustomLegend = () => {
-    const allKeys = ['total_aggregate_revenue', ...deployments];
+    const allKeys = ['total_7_days_ma_revenue', ...deployments];
     return (
       <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {allKeys.map((key, index) => (
@@ -97,9 +107,9 @@ const DeploymentRevenueChart: React.FC = () => {
               }}
             />
             {
-            key === 'total_aggregate_revenue' 
+            key === 'total_7_days_ma_revenue' 
             ? 'Total' 
-            : capitalize(key.replace('_total_deployment_revenue', ''))
+            : capitalize(key.replace('_7_days_ma_revenue', ''))
             }
           </li>
         ))}
@@ -110,7 +120,7 @@ const DeploymentRevenueChart: React.FC = () => {
   const visibleData = useMemo(() => {
     return chartData.filter(entry => {
       return Object.entries(visibleLines).some(([key, isVisible]) => {
-        return isVisible && entry[key] !== undefined;
+        return isVisible && entry[`${key}_7_days_ma_revenue`] !== undefined;
       });
     });
   }, [chartData, visibleLines]);
@@ -160,19 +170,19 @@ const DeploymentRevenueChart: React.FC = () => {
           <Legend content={<CustomLegend />} />
           <Line 
             type="monotone"
-            dataKey="total_aggregate_revenue"
-            name="Total Aggregate Revenue"
+            dataKey="total_7_days_ma_revenue"
+            name="Total 7 Days MA Revenue"
             stroke={colors[0]}
             dot={false}
             strokeWidth={2}
-            hide={!visibleLines['total_aggregate_revenue']}
+            hide={!visibleLines['total_7_days_ma_revenue']}
           />
           {deployments.map((deployment, index) => (
             <Line 
               key={deployment}
               type="monotone"
-              dataKey={deployment}
-              name={deployment}
+              dataKey={`${deployment}_7_days_ma_revenue`}
+              name={`${deployment}`}
               stroke={colors[(index + 1) % colors.length]}
               dot={false}
               hide={!visibleLines[deployment]}
@@ -184,4 +194,4 @@ const DeploymentRevenueChart: React.FC = () => {
   );
 };
 
-export default DeploymentRevenueChart;
+export default SevenDayMARevenueChart;

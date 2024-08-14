@@ -7,6 +7,7 @@ import RevenueChart from './RevenueChart';
 import TokenRevenuePieChart from './TokenRevenuePieChart';
 import RevenueCards from './RevenueCards';
 import DeploymentRevenueChart from './DeploymentRevenueChart';
+import SevenDayMARevenueChart from './SevenDayMARevenueChart.tsx';
 
 const api_url = 'http://localhost:8000';
 
@@ -114,8 +115,11 @@ function FileDownloader() {
         <DeploymentRevenueChart />
       </div>
       <div>
-      <RevenueChart />
+        <SevenDayMARevenueChart />
       </div>
+      {/* <div>
+      <RevenueChart />
+      </div> */}
     </>
   );
 }
