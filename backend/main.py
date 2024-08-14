@@ -344,6 +344,7 @@ def get_deployment_revenue():
     
     return jsonify(result)
 
+# # 7 Days MA
 @app.route('/api/7_days_ma_revenue', methods=['GET'])
 def get_7_days_ma_revenue():
     bucket_name = 'cooldowns2'
@@ -380,6 +381,116 @@ def get_7_days_ma_revenue():
     
     return jsonify(result)
 
+# # 30 days MA 
+@app.route('/api/30_days_ma_revenue', methods=['GET'])
+def get_30_days_ma_revenue():
+    bucket_name = 'cooldowns2'
+    filename = 'combined_deployment_revenue.zip'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(filename)
+
+    content = blob.download_as_bytes()
+    data = []
+
+    with zipfile.ZipFile(io.BytesIO(content)) as z:
+        for zip_filename in z.namelist():
+            if zip_filename.endswith('.csv'):
+                with z.open(zip_filename) as f:
+                    df = pd.read_csv(f)
+                    df['day'] = pd.to_datetime(df['day'])
+                    data = df.to_dict(orient='records')
+
+    # Group by day
+    grouped_data = {}
+    for entry in data:
+        day = entry['day'].strftime('%Y-%m-%d')  # Convert to string
+        if day not in grouped_data:
+            grouped_data[day] = {
+                'day': day, 
+                'total_30_days_ma_revenue': entry['total_30_days_ma_revenue']
+            }
+        deployment = entry['deployment']
+        grouped_data[day][f"{deployment}_30_days_ma_revenue"] = entry['30_days_ma_revenue']
+
+    # Convert to list of dictionaries
+    result = list(grouped_data.values())
+    
+    return jsonify(result)
+
+# # 90 days MA 
+@app.route('/api/90_days_ma_revenue', methods=['GET'])
+def get_90_days_ma_revenue():
+    bucket_name = 'cooldowns2'
+    filename = 'combined_deployment_revenue.zip'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(filename)
+
+    content = blob.download_as_bytes()
+    data = []
+
+    with zipfile.ZipFile(io.BytesIO(content)) as z:
+        for zip_filename in z.namelist():
+            if zip_filename.endswith('.csv'):
+                with z.open(zip_filename) as f:
+                    df = pd.read_csv(f)
+                    df['day'] = pd.to_datetime(df['day'])
+                    data = df.to_dict(orient='records')
+
+    # Group by day
+    grouped_data = {}
+    for entry in data:
+        day = entry['day'].strftime('%Y-%m-%d')  # Convert to string
+        if day not in grouped_data:
+            grouped_data[day] = {
+                'day': day, 
+                'total_90_days_ma_revenue': entry['total_90_days_ma_revenue']
+            }
+        deployment = entry['deployment']
+        grouped_data[day][f"{deployment}_90_days_ma_revenue"] = entry['90_days_ma_revenue']
+
+    # Convert to list of dictionaries
+    result = list(grouped_data.values())
+    
+    return jsonify(result)
+
+# # 180 days MA 
+@app.route('/api/180_days_ma_revenue', methods=['GET'])
+def get_180_days_ma_revenue():
+    bucket_name = 'cooldowns2'
+    filename = 'combined_deployment_revenue.zip'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(filename)
+
+    content = blob.download_as_bytes()
+    data = []
+
+    with zipfile.ZipFile(io.BytesIO(content)) as z:
+        for zip_filename in z.namelist():
+            if zip_filename.endswith('.csv'):
+                with z.open(zip_filename) as f:
+                    df = pd.read_csv(f)
+                    df['day'] = pd.to_datetime(df['day'])
+                    data = df.to_dict(orient='records')
+
+    # Group by day
+    grouped_data = {}
+    for entry in data:
+        day = entry['day'].strftime('%Y-%m-%d')  # Convert to string
+        if day not in grouped_data:
+            grouped_data[day] = {
+                'day': day, 
+                'total_180_days_ma_revenue': entry['total_180_days_ma_revenue']
+            }
+        deployment = entry['deployment']
+        grouped_data[day][f"{deployment}_180_days_ma_revenue"] = entry['180_days_ma_revenue']
+
+    # Convert to list of dictionaries
+    result = list(grouped_data.values())
+    
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(use_reloader=True, port=8000, threaded=True, DEBUG=True)

@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react'
 import cod3xLogo from './assets/cod3x.jpg'
 import './App.css'
 import axios from 'axios'
-import RevenueChart from './RevenueChart';
 import TokenRevenuePieChart from './TokenRevenuePieChart';
 import RevenueCards from './RevenueCards';
 import DeploymentRevenueChart from './DeploymentRevenueChart';
 import SevenDayMARevenueChart from './SevenDayMARevenueChart.tsx';
+import ThirtyDayMARevenueChart from './ThirtyDayMARevenueChart.tsx';
+import NinetyDayMARevenueChart from './NinetyDayMARevenueChart.tsx';
+import OneEightyDayMARevenueChart from './OneEightyDayMARevenueChart.tsx';
 
 const api_url = 'http://localhost:8000';
 
@@ -110,16 +112,26 @@ function FileDownloader() {
       <div>
         <TokenRevenuePieChart />
       </div>
-      <h2>Cumulative Revenue Per Deployment</h2>
+      <h3>Cumulative Revenue Per Deployment</h3>
       <div>
         <DeploymentRevenueChart />
       </div>
       <div>
+      <h3>7 Day MA Revenue Per Deployment</h3>
         <SevenDayMARevenueChart />
       </div>
-      {/* <div>
-      <RevenueChart />
-      </div> */}
+      <div>
+      <h3>30 Day MA Revenue Per Deployment</h3>
+        <ThirtyDayMARevenueChart />
+      </div>
+      <div>
+      <h3>90 Day MA Revenue Per Deployment</h3>
+        <NinetyDayMARevenueChart />
+      </div>
+      <div>
+      <h3>180 Day MA Revenue Per Deployment</h3>
+        <OneEightyDayMARevenueChart />
+      </div>
     </>
   );
 }
