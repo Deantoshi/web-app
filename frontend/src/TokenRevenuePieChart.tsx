@@ -8,7 +8,7 @@ interface TokenRevenueData {
   token_revenue: number;
 }
 
-const api_url = 'http://localhost:8000';
+const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
 
 const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('en-US', {

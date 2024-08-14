@@ -10,8 +10,9 @@ import SevenDayMARevenueChart from './SevenDayMARevenueChart.tsx';
 import ThirtyDayMARevenueChart from './ThirtyDayMARevenueChart.tsx';
 import NinetyDayMARevenueChart from './NinetyDayMARevenueChart.tsx';
 import OneEightyDayMARevenueChart from './OneEightyDayMARevenueChart.tsx';
+import RevenueByTypeChart from './RevenueByTypeChart.tsx';
 
-const api_url = 'http://localhost:8000';
+const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
 
 interface FileData {
   filename: string;
@@ -131,6 +132,10 @@ function FileDownloader() {
       <div>
       <h3>180 Day MA Revenue Per Deployment</h3>
         <OneEightyDayMARevenueChart />
+      </div>
+      <div>
+      <h3>Cumulative Revenue by Type</h3>
+        <RevenueByTypeChart />
       </div>
     </>
   );

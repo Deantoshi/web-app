@@ -13,7 +13,7 @@ interface ChartData {
   "180_days_ma_revenue": string;
 }
 
-const api_url = 'http://localhost:8000';
+const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {

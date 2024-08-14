@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum', 'aggregate']
 
 app = Flask(__name__)
-cors = CORS(app, origins='*')
-# CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
+# cors = CORS(app, origins='*')
+CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
 
 # Initialize GCP storage client
 credentials, project = default()
@@ -491,6 +491,36 @@ def get_180_days_ma_revenue():
     result = list(grouped_data.values())
     
     return jsonify(result)
+
+# # revenue_by_type
+@app.route('/api/revenue_by_type', methods=['GET'])
+def get_revenue_by_type():
+    bucket_name = 'cooldowns2'
+    filename = 'revenue_by_type.zip'
+    storage_client = storage.Client(credentials=get_credentials())
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(filename)
+
+    content = blob.download_as_bytes()
+    data = []
+
+    with zipfile.ZipFile(io.BytesIO(content)) as z:
+        for zip_filename in z.namelist():
+            if zip_filename.endswith('.csv'):
+                with z.open(zip_filename) as f:
+                    df = pd.read_csv(f)
+                    df['day'] = pd.to_datetime(df['day'])
+                    
+                    # Select only the required columns
+                    df = df[['day', 'revenue_type', 'cumulative_revenue']]  # Assuming 'total_revenue' is your cumulative revenue column
+                    
+                    data = df.to_dict(orient='records')
+
+    # Convert datetime to string for JSON serialization
+    for entry in data:
+        entry['day'] = entry['day'].strftime('%Y-%m-%d')
+
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(use_reloader=True, port=8000, threaded=True, DEBUG=True)
