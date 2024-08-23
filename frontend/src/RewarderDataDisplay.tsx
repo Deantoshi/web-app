@@ -72,27 +72,32 @@ const RewarderDataDisplay: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1>MRP Hub</h1>
-      <h2>Rewarder Data</h2>
+    <div style={{ 
+      padding: '1rem', 
+      maxWidth: '1200px', 
+      margin: '0 auto',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    }}>
       {Object.entries(data).map(([protocol, rewarders]) => (
-        <div key={protocol} style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>{capitalizeFirstLetter(protocol)}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div key={protocol} style={{ 
+          marginBottom: '2rem', 
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}>
+          <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>{capitalizeFirstLetter(protocol)}</h3>
+          <div className="rewarder-grid">
             {rewarders.map((rewarder, index) => (
-              <div key={index} style={{ 
-                border: '1px solid #ccc', 
-                borderRadius: '0.5rem', 
-                padding: '1rem',
-                backgroundColor: '#1e1e24',
-                color: '#fff8f0'
-              }}>
-                <h4 style={{ marginTop: 0 }}>Rewarder Type: {rewarder.rewarder_type}</h4>
+              <div key={index} className="rewarder-card">
+                <h4>Rewarder Type: {rewarder.rewarder_type}</h4>
                 <p style={{ color: getBalanceColor(rewarder.rewarder_type, rewarder.rewarder_balance) }}>
                   Balance: {formatNumber(rewarder.rewarder_balance)} {rewarder.reward_token_symbol}
                 </p>
-                <p>Token: <a href={rewarder.reward_token_link} target="_blank" rel="noopener noreferrer" style={{ color: '#66b3ff' }}>{rewarder.reward_token_address}</a></p>
-                <p>Rewarder: <a href={rewarder.rewarder_link} target="_blank" rel="noopener noreferrer" style={{ color: '#66b3ff' }}>{rewarder.rewarder_address}</a></p>
+                <p>Token: <a href={rewarder.reward_token_link} target="_blank" rel="noopener noreferrer">{rewarder.reward_token_address}</a></p>
+                <p>Rewarder: <a href={rewarder.rewarder_link} target="_blank" rel="noopener noreferrer">{rewarder.rewarder_address}</a></p>
                 <p>Last Checked: {rewarder.timestamp}</p>
               </div>
             ))}

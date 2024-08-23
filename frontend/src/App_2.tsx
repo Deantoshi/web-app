@@ -1,11 +1,16 @@
-// App.tsx (or FileDownloader.tsx)
-import { useState, useEffect } from 'react'
-import cod3xLogo from './assets/cod3x.jpg'
-import './App.css'
-import axios from 'axios'
-import RevenueChart from './RevenueChart';
+import React, { useState, useEffect } from 'react';
+import cod3xLogo from './assets/cod3x.jpg';
+import './App.css';
+import axios from 'axios';
 import TokenRevenuePieChart from './TokenRevenuePieChart';
 import RevenueCards from './RevenueCards';
+import DeploymentRevenueChart from './DeploymentRevenueChart';
+import SevenDayMARevenueChart from './SevenDayMARevenueChart';
+import ThirtyDayMARevenueChart from './ThirtyDayMARevenueChart';
+import NinetyDayMARevenueChart from './NinetyDayMARevenueChart';
+import OneEightyDayMARevenueChart from './OneEightyDayMARevenueChart';
+import RevenueByTypeChart from './RevenueByTypeChart';
+import RewarderDataDisplay from './RewarderDataDisplay';
 
 const api_url = 'http://localhost:8000';
 
@@ -14,11 +19,12 @@ interface FileData {
   signedUrl: string;
 }
 
-function FileDownloader() {
+function App() {
   const [files, setFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFiles, setIsLoadingFiles] = useState(true);
+  const [activeTab, setActiveTab] = useState('rewarder');
 
   useEffect(() => {
     setIsLoadingFiles(true);
@@ -60,59 +66,95 @@ function FileDownloader() {
     }
   };
 
-  return (
-    <>
-      <div>
-        <a href="https://www.cod3x.org/" target="_blank">
-          <img src={cod3xLogo} className="logo cod3x-logo" alt="Cod3x logo" />
-        </a>
-      </div>
-      <h1>MRP Hub</h1>
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'rewarder':
+        return <RewarderDataDisplay />;
+      case 'revenue':
+        return <RevenueCards />;
+      case 'tokenRevenue':
+        return <TokenRevenuePieChart />;
+      case 'deploymentRevenue':
+        return <DeploymentRevenueChart />;
+      case 'sevenDayMA':
+        return <SevenDayMARevenueChart />;
+      case 'thirtyDayMA':
+        return <ThirtyDayMARevenueChart />;
+      case 'ninetyDayMA':
+        return <NinetyDayMARevenueChart />;
+      case 'oneEightyDayMA':
+        return <OneEightyDayMARevenueChart />;
+      case 'revenueByType':
+        return <RevenueByTypeChart />;
+      default:
+        return null;
+    }
+  };
 
-      <div className="file-dropdown-container">
-        <h2>Select a file to download:</h2>
-        {isLoadingFiles ? (
-          <p>Loading files...</p>
-        ) : (
-          <>
-            <select 
-              className="file-dropdown"
-              value={selectedFile} 
-              onChange={handleFileSelect}
-              disabled={isLoading}
-            >
-              <option value="">Select a file</option>
-              {files.map(file => (
-                <option key={file} value={file}>
-                  {file}
-                </option>
-              ))}
-            </select>
-            <button 
-              className={`download-button ${isLoading ? 'downloading' : ''}`}
-              onClick={handleDownload} 
-              disabled={!selectedFile || isLoading}
-            >
-              {isLoading ? 'Initiating Download...' : 'Download'}
-            </button>
-            {isLoading && <div className="download-animation"></div>}
-          </>
-        )}
-      </div>
-      <h2>Revenue Summary Data</h2>
-      <div className="App">
-        <RevenueCards />
-      </div>
-      <h2>Revenue Charts</h2>
-      <h3>Revenue Per Token</h3>
-      <div>
-        <TokenRevenuePieChart />
-      </div>
-      <div>
-      <RevenueChart />
-      </div>
-    </>
+  return (
+    <div className="app-container">
+      <aside className="sidebar">
+        <div className="logo-container">
+          <a href="https://www.cod3x.org/" target="_blank" rel="noopener noreferrer">
+            <img src={cod3xLogo} className="logo cod3x-logo" alt="Cod3x logo" />
+          </a>
+        </div>
+        <nav className="sidebar-navigation">
+          <button onClick={() => setActiveTab('rewarder')} className={activeTab === 'rewarder' ? 'active' : ''}>Rewarder Data</button>
+          <button onClick={() => setActiveTab('revenue')} className={activeTab === 'revenue' ? 'active' : ''}>Revenue Summary</button>
+          <button onClick={() => setActiveTab('tokenRevenue')} className={activeTab === 'tokenRevenue' ? 'active' : ''}>Token Revenue</button>
+          <button onClick={() => setActiveTab('deploymentRevenue')} className={activeTab === 'deploymentRevenue' ? 'active' : ''}>Deployment Revenue</button>
+          <button onClick={() => setActiveTab('sevenDayMA')} className={activeTab === 'sevenDayMA' ? 'active' : ''}>7 Day MA</button>
+          <button onClick={() => setActiveTab('thirtyDayMA')} className={activeTab === 'thirtyDayMA' ? 'active' : ''}>30 Day MA</button>
+          <button onClick={() => setActiveTab('ninetyDayMA')} className={activeTab === 'ninetyDayMA' ? 'active' : ''}>90 Day MA</button>
+          <button onClick={() => setActiveTab('oneEightyDayMA')} className={activeTab === 'oneEightyDayMA' ? 'active' : ''}>180 Day MA</button>
+          <button onClick={() => setActiveTab('revenueByType')} className={activeTab === 'revenueByType' ? 'active' : ''}>Revenue by Type</button>
+        </nav>
+      </aside>
+
+      <main className="main-content">
+        <header>
+          <h1>MRP Hub</h1>
+        </header>
+
+        <section className="file-downloader">
+          <h2>Select a file to download:</h2>
+          {isLoadingFiles ? (
+            <p>Loading files...</p>
+          ) : (
+            <>
+              <select 
+                className="file-dropdown"
+                value={selectedFile} 
+                onChange={handleFileSelect}
+                disabled={isLoading}
+              >
+                <option value="">Select a file</option>
+                {files.map(file => (
+                  <option key={file} value={file}>
+                    {file}
+                  </option>
+                ))}
+              </select>
+              <button 
+                className={`download-button ${isLoading ? 'downloading' : ''}`}
+                onClick={handleDownload} 
+                disabled={!selectedFile || isLoading}
+              >
+                {isLoading ? 'Initiating Download...' : 'Download'}
+              </button>
+              {isLoading && <div className="download-animation"></div>}
+            </>
+          )}
+        </section>
+
+        <section className="chart-display">
+          <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Chart</h2>
+          {renderContent()}
+        </section>
+      </main>
+    </div>
   );
 }
 
-export default FileDownloader;
+export default App;

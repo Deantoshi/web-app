@@ -1,12 +1,14 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  text-align: left;
 }
 
+
 .logo {
-  height: 6em;
+  height: 10em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
@@ -16,6 +18,12 @@
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+.logo-container {
+  margin-bottom: 20px;
+  padding: 0 10px;
+  width: 100%;
 }
 
 @keyframes logo-spin {
@@ -51,6 +59,11 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.file-dropdown {
+  width: 100%;
+  padding: 0.5rem;
 }
 
 .custom-dropdown {
@@ -91,4 +104,168 @@
 
 .dropdown-list li:hover {
   background-color: #f0f0f0;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #222222;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sidebar-navigation button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  padding: 10px 15px;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100%;
+}
+
+.sidebar-navigation button:hover {
+  background-color: #333333;
+}
+
+.sidebar-navigation button.active {
+  background-color: #444444;
+}
+
+.sidebar-content {
+  padding: 20px;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.centered-text {
+  text-align: center;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.file-downloader {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.download-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.download-button {
+  width: 100%;
+  padding: 0.5rem 1rem;
+}
+
+.centered-cards {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.revenue-cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.rewarder-tracker-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 800px; /* Adjust this value as needed */
+  margin-bottom: 2rem;
+}
+
+.chart-container h2 {
+  margin-bottom: 1rem;
+}
+
+.rewarder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .rewarder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rewarder-card {
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #1e1e24;
+  color: #fff8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.rewarder-card h4 {
+  margin-top: 0;
+}
+
+.rewarder-card p {
+  margin: 0.5rem 0;
+}
+
+.rewarder-card a {
+  color: #66b3ff;
+  word-break: break-all;
 }
