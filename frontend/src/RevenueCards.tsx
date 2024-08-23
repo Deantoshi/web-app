@@ -18,7 +18,7 @@ interface DataCardProps {
   color: string;
 }
 
-const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
+const api_url = 'http://localhost:8000';
 
 const DataCard: React.FC<DataCardProps> = ({ title, value, total, color }) => {
   return (

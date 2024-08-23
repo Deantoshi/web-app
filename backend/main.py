@@ -19,11 +19,11 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 
 
-KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum', 'aggregate']
+KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum', 'lore', 'aggregate']
 
 app = Flask(__name__)
-# cors = CORS(app, origins='*')
-CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
+cors = CORS(app, origins='*')
+# CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
 
 # Initialize GCP storage client
 credentials, project = default()
@@ -521,6 +521,50 @@ def get_revenue_by_type():
         entry['day'] = entry['day'].strftime('%Y-%m-%d')
 
     return jsonify(data)
+
+@app.route('/api/rewarder_data', methods=['GET'])
+def get_rewarder_data():
+    app.logger.info("Received request for rewarder data")
+    bucket_name = 'cooldowns2'
+    filename = 'rewarder.zip'
+    
+    try:
+        app.logger.info(f"Attempting to access {filename} from {bucket_name} bucket")
+        storage_client = storage.Client(credentials=get_credentials())
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(filename)
+
+        # Download the content of the blob as bytes
+        content = blob.download_as_bytes()
+        app.logger.info(f"Successfully downloaded {filename} from GCS")
+
+        # Use BytesIO to create a file-like object from the bytes content
+        with zipfile.ZipFile(io.BytesIO(content)) as z:
+            app.logger.info("Successfully opened zip file")
+            app.logger.info("Attempting to open rewarder.csv within the zip file")
+            with z.open('rewarder.csv') as f:
+                app.logger.info("Successfully opened rewarder.csv")
+                df = pd.read_csv(f)
+                app.logger.info(f"Successfully read CSV data. Shape: {df.shape}")
+                
+        # Convert timestamp to datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        # Group by protocol
+        grouped_data = df.groupby('protocol').apply(lambda x: x.to_dict('records')).to_dict()
+        app.logger.info(f"Grouped data by protocol. Number of protocols: {len(grouped_data)}")
+        
+        # Convert datetime back to string for JSON serialization
+        for protocol, data in grouped_data.items():
+            for entry in data:
+                entry['timestamp'] = entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S %Z')
+        
+        app.logger.info("Successfully prepared data for JSON response")
+        return jsonify(grouped_data)
+    
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(use_reloader=True, port=8000, threaded=True, DEBUG=True)

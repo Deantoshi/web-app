@@ -11,8 +11,9 @@ import ThirtyDayMARevenueChart from './ThirtyDayMARevenueChart.tsx';
 import NinetyDayMARevenueChart from './NinetyDayMARevenueChart.tsx';
 import OneEightyDayMARevenueChart from './OneEightyDayMARevenueChart.tsx';
 import RevenueByTypeChart from './RevenueByTypeChart.tsx';
+import RewarderDataDisplay from './RewarderDataDisplay.tsx'
 
-const api_url = "https://api-dot-internal-website-427620.uc.r.appspot.com";
+const api_url = 'http://localhost:8000';
 
 interface FileData {
   filename: string;
@@ -104,7 +105,11 @@ function FileDownloader() {
           </>
         )}
       </div>
-      <h2>Revenue Summary Data</h2>
+      <h2>Rewarder Data</h2>
+      <div>
+        <RewarderDataDisplay></RewarderDataDisplay>
+      </div>
+      {/* <h2>Revenue Summary Data</h2>
       <div className="App">
         <RevenueCards />
       </div>
@@ -136,7 +141,7 @@ function FileDownloader() {
       <div>
       <h3>Cumulative Revenue by Type</h3>
         <RevenueByTypeChart />
-      </div>
+      </div> */}
     </>
   );
 }
