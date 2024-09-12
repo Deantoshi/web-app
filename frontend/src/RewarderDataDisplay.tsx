@@ -12,6 +12,7 @@ interface RewarderData {
   reward_token_link: string;
   rewarder_owner: string;
   rewarder_owner_link: string;
+  how_to_fund: string;
 }
 
 interface GroupedRewarderData {
@@ -82,6 +83,9 @@ const RewarderDataDisplay: React.FC = () => {
       flexDirection: 'column',
       alignItems: 'center'
     }}>
+      <a href={"https://bytemasons.notion.site/JSONs-for-Funding-Rewarders-230f8f79527844b69800018079ded66d"} target="_blank" rel="noopener noreferrer">
+      <h2 style={{textAlign: 'center'}}>Premade Refill JSON Files</h2>
+      </a>
       {Object.entries(data).map(([protocol, rewarders]) => (
         <div key={protocol} style={{ 
           marginBottom: '2rem', 
@@ -101,6 +105,7 @@ const RewarderDataDisplay: React.FC = () => {
                 <p>Token: <a href={rewarder.reward_token_link} target="_blank" rel="noopener noreferrer">{rewarder.reward_token_address}</a></p>
                 <p>Rewarder: <a href={rewarder.rewarder_link} target="_blank" rel="noopener noreferrer">{rewarder.rewarder_address}</a></p>
                 <p>Owner: <a href={rewarder.rewarder_owner_link} target="_blank" rel="noopener noreferrer">{rewarder.rewarder_owner}</a></p>
+                <p>Funding: {rewarder.how_to_fund}</p>
                 <p>Last Checked: {rewarder.timestamp}</p>
               </div>
             ))}
