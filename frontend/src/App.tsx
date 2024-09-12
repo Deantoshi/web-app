@@ -101,6 +101,7 @@ function App() {
                 </div>
               )}
             </section>
+            <h2>Top Line Revenue Goals</h2>
             <div className="centered-cards">
               <RevenueCards />
             </div>

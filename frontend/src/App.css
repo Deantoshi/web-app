@@ -112,7 +112,7 @@
 }
 
 .sidebar {
-  width: 250px;
+  width: 10%;
   background-color: #222222;
   padding: 20px 0;
   display: flex;
@@ -162,6 +162,8 @@
 body {
   margin: 0;
   padding: 0;
+  background-color: #222222;
+  color: #ffffff;
 }
 
 * {
@@ -232,6 +234,10 @@ body {
   margin-bottom: 1rem;
 }
 
+h2 {
+  text-align: center;
+}
+
 .rewarder-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -269,3 +275,9 @@ body {
   color: #66b3ff;
   word-break: break-all;
 }
+
+body.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+

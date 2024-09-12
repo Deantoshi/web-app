@@ -10,6 +10,8 @@ interface RewarderData {
   timestamp: string;
   rewarder_link: string;
   reward_token_link: string;
+  rewarder_owner: string;
+  rewarder_owner_link: string;
 }
 
 interface GroupedRewarderData {
@@ -98,6 +100,7 @@ const RewarderDataDisplay: React.FC = () => {
                 </p>
                 <p>Token: <a href={rewarder.reward_token_link} target="_blank" rel="noopener noreferrer">{rewarder.reward_token_address}</a></p>
                 <p>Rewarder: <a href={rewarder.rewarder_link} target="_blank" rel="noopener noreferrer">{rewarder.rewarder_address}</a></p>
+                <p>Owner: <a href={rewarder.rewarder_owner_link} target="_blank" rel="noopener noreferrer">{rewarder.rewarder_owner}</a></p>
                 <p>Last Checked: {rewarder.timestamp}</p>
               </div>
             ))}

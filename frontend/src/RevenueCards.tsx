@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './App.css';
 
 interface RevenueData {
   day: string;
@@ -21,11 +22,13 @@ interface DataCardProps {
 const api_url = 'http://localhost:8000';
 
 const DataCard: React.FC<DataCardProps> = ({ title, value, total, color }) => {
+  const percentage = (parseFloat(value) / total) * 100;
+
   return (
     <div style={{ 
       width: 200, 
       height: 200, 
-      border: '1px solid #ccc', 
+      border: '2px solid black', 
       borderRadius: 10, 
       padding: 10,
       display: 'flex',
@@ -47,13 +50,34 @@ const DataCard: React.FC<DataCardProps> = ({ title, value, total, color }) => {
         backgroundColor: '#eee',
         borderRadius: 5,
         overflow: 'hidden',
-        margin: '10px 0'
+        margin: '10px 0',
+        position: 'relative',
+        border: '2px solid black', // Added black border
+        boxSizing: 'border-box' // Ensures border doesn't increase overall size
       }}>
         <div style={{
-          width: `${(parseFloat(value) / total) * 100}%`,
+          width: `${percentage}%`,
           height: '100%',
-          backgroundColor: color
+          backgroundColor: color,
+          position: 'absolute',
+          left: 0,
+          top: 0
         }}></div>
+        {[25, 50, 75].map((notchPercentage) => (
+          <div
+            key={notchPercentage}
+            style={{
+              position: 'absolute',
+              left: `${notchPercentage}%`,
+              top: 0,
+              bottom: 0,
+              width: 2,
+              backgroundColor: 'black',
+              transform: 'skew(-45deg)',
+              zIndex: 1
+            }}
+          ></div>
+        ))}
       </div>
     </div>
   );
@@ -90,16 +114,30 @@ const RevenueCards: React.FC = () => {
   const targetDailyRevenue = parseFloat(revenueData.target_daily_revenue);
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
-      {cardData.map((card) => (
-        <DataCard
-          key={card.key}
-          title={card.title}
-          value={revenueData[card.key]}
-          total={targetDailyRevenue * (card.key === 'todays_revenue' ? 1 : parseInt(card.key))}
-          color={card.color}
-        />
-      ))}
+    <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginBottom: 20 }}>
+        {cardData.map((card) => (
+          <DataCard
+            key={card.key}
+            title={card.title}
+            value={revenueData[card.key]}
+            total={targetDailyRevenue * (card.key === 'todays_revenue' ? 1 : parseInt(card.key))}
+            color={card.color}
+          />
+        ))}
+      </div>
+      <h2>Bottom Line Revenue Goals (30% Rev. Capture)</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+        {cardData.map((card) => (
+          <DataCard
+            key={`30-percent-${card.key}`}
+            title={`${card.title}`}
+            value={(parseFloat(revenueData[card.key]) * 0.3).toString()}
+            total={targetDailyRevenue * (card.key === 'todays_revenue' ? 1 : parseInt(card.key)) * 0.3}
+            color={card.color}
+          />
+        ))}
+      </div>
     </div>
   );
 };
