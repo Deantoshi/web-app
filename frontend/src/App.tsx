@@ -67,12 +67,19 @@ function App() {
     }
   };
 
-  const handleDownloadAll = async () => {
-    if (files.length === 0) return;
+  const handleFilteredDownload = async (includeRevenue: boolean) => {
+    const filesToDownload = files.filter(file => 
+      includeRevenue ? file.toLowerCase().includes('revenue') : !file.toLowerCase().includes('revenue')
+    );
+
+    if (filesToDownload.length === 0) {
+      alert(`No ${includeRevenue ? 'revenue' : 'non-revenue'} files found.`);
+      return;
+    }
 
     setIsDownloadingAll(true);
     try {
-      for (const file of files) {
+      for (const file of filesToDownload) {
         const response = await axios.get<FileData>(`${api_url}/api/download/${file}`);
         const { signedUrl } = response.data;
         
@@ -83,12 +90,11 @@ function App() {
         link.click();
         document.body.removeChild(link);
 
-        // Add a small delay between downloads to prevent overwhelming the browser
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } catch (error) {
-      console.error('Error downloading all files:', error);
-      alert('Failed to download all files. Please try again.');
+      console.error('Error downloading files:', error);
+      alert('Failed to download files. Please try again.');
     } finally {
       setIsDownloadingAll(false);
     }
@@ -125,14 +131,23 @@ function App() {
                   >
                     {isLoading ? 'Initiating Download...' : 'Download'}
                   </button>
-                  <button 
-                    className={`download-all-button ${isDownloadingAll ? 'downloading' : ''}`}
-                    onClick={handleDownloadAll} 
-                    disabled={files.length === 0 || isLoading || isDownloadingAll}
-                  >
-                  {isDownloadingAll ? 'Downloading All...' : 'Download All'}
-                  </button>
-                  {isLoading && <div className="download-animation"></div>}
+                  <div className="download-all-buttons">
+                    <button 
+                      className={`download-revenue-button ${isDownloadingAll ? 'downloading' : ''}`}
+                      onClick={() => handleFilteredDownload(true)} 
+                      disabled={files.length === 0 || isLoading || isDownloadingAll}
+                    >
+                      Download All Revenue Files
+                    </button>
+                    <button 
+                      className={`download-non-revenue-button ${isDownloadingAll ? 'downloading' : ''}`}
+                      onClick={() => handleFilteredDownload(false)} 
+                      disabled={files.length === 0 || isLoading || isDownloadingAll}
+                    >
+                      Download All Non-Revenue Files
+                    </button>
+                  </div>
+                  {(isLoading || isDownloadingAll) && <div className="download-animation"></div>}
                 </div>
               )}
             </section>
