@@ -25,6 +25,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFiles, setIsLoadingFiles] = useState(true);
   const [activeTab, setActiveTab] = useState('summary');
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   useEffect(() => {
     setIsLoadingFiles(true);
@@ -66,6 +67,33 @@ function App() {
     }
   };
 
+  const handleDownloadAll = async () => {
+    if (files.length === 0) return;
+
+    setIsDownloadingAll(true);
+    try {
+      for (const file of files) {
+        const response = await axios.get<FileData>(`${api_url}/api/download/${file}`);
+        const { signedUrl } = response.data;
+        
+        const link = document.createElement('a');
+        link.href = signedUrl;
+        link.setAttribute('download', file);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Add a small delay between downloads to prevent overwhelming the browser
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } catch (error) {
+      console.error('Error downloading all files:', error);
+      alert('Failed to download all files. Please try again.');
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'summary':
@@ -96,6 +124,13 @@ function App() {
                     disabled={!selectedFile || isLoading}
                   >
                     {isLoading ? 'Initiating Download...' : 'Download'}
+                  </button>
+                  <button 
+                    className={`download-all-button ${isDownloadingAll ? 'downloading' : ''}`}
+                    onClick={handleDownloadAll} 
+                    disabled={files.length === 0 || isLoading || isDownloadingAll}
+                  >
+                  {isDownloadingAll ? 'Downloading All...' : 'Download All'}
                   </button>
                   {isLoading && <div className="download-animation"></div>}
                 </div>
