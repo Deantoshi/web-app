@@ -11,6 +11,7 @@ import NinetyDayMARevenueChart from './NinetyDayMARevenueChart';
 import OneEightyDayMARevenueChart from './OneEightyDayMARevenueChart';
 import RevenueByTypeChart from './RevenueByTypeChart';
 import RewarderDataDisplay from './RewarderDataDisplay';
+import LoadingAnimation from './LoadingAnimation';
 
 const api_url = 'http://localhost:8000';
 
@@ -108,7 +109,7 @@ function App() {
             <section className="file-downloader">
               <h2 className="centered-text">Select a file to download:</h2>
               {isLoadingFiles ? (
-                <p>Loading files...</p>
+                <p className='centered-text'>Loading files...</p>
               ) : (
                 <div className="download-container">
                   <select 
@@ -147,7 +148,7 @@ function App() {
                       Download All Non-Revenue Files
                     </button>
                   </div>
-                  {(isLoading || isDownloadingAll) && <div className="download-animation"></div>}
+                  {/* {(isLoading || isDownloadingAll) && <LoadingAnimation />} */}
                 </div>
               )}
             </section>
@@ -188,6 +189,7 @@ function App() {
   };
 
   return (
+    <>
     <div className="app-container">
       <aside className="sidebar sticky">
         <div className="sidebar-content">
@@ -215,6 +217,8 @@ function App() {
         </section>
       </main>
     </div>
+    {(isLoading || isDownloadingAll) && <LoadingAnimation />}
+    </>
   );
 }
 
