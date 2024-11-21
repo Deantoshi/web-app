@@ -20,6 +20,8 @@ interface DataCardProps {
 }
 
 const api_url = 'http://localhost:8000';
+const LEND_FILE = 'lend_revenue_data_card.zip';
+const OUR_LEND_FILE = 'our_lend_revenue_data_card.zip';
 
 const DataCard: React.FC<DataCardProps> = ({ title, value, total, color }) => {
   const percentage = (parseFloat(value) / total) * 100;
@@ -84,26 +86,49 @@ const DataCard: React.FC<DataCardProps> = ({ title, value, total, color }) => {
 };
 
 const RevenueCards: React.FC = () => {
-  const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
+  const [lendData, setLendData] = useState<RevenueData | null>(null);
+  const [ourLendData, setOurLendData] = useState<RevenueData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBothDataSets = async () => {
+      setIsLoading(true);
+      setError(null);
+      
       try {
-        const response = await axios.get<RevenueData[]>(`${api_url}/api/revenue_card_data`);
-        setRevenueData(response.data[0]); // Assuming we want the most recent day's data
+        // Fetch both datasets in parallel
+        const [lendResponse, ourLendResponse] = await Promise.all([
+          axios.get<RevenueData[]>(`${api_url}/api/revenue_card_data`, {
+            params: { filename: LEND_FILE }
+          }),
+          axios.get<RevenueData[]>(`${api_url}/api/revenue_card_data`, {
+            params: { filename: OUR_LEND_FILE }
+          })
+        ]);
+
+        setLendData(lendResponse.data[0]);
+        setOurLendData(ourLendResponse.data[0]);
       } catch (error) {
+        setError('Error fetching revenue data');
         console.error('Error fetching revenue data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchData();
+    fetchBothDataSets();
   }, []);
 
-  if (!revenueData) {
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  const cardData: Array<{title: string; key: keyof RevenueData; color: string}> = [
+  const cardData = [
     { title: "Today's Revenue", key: 'todays_revenue', color: '#386641' },
     { title: '7 Day Revenue', key: '7_day_revenue', color: '#6a4c93' },
     { title: '30 Day Revenue', key: '30_day_revenue', color: '#118ab2' },
@@ -111,33 +136,42 @@ const RevenueCards: React.FC = () => {
     { title: '180 Day Revenue', key: '180_day_revenue', color: '#782832' },
   ];
 
-  const targetDailyRevenue = parseFloat(revenueData.target_daily_revenue);
-
   return (
     <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginBottom: 20 }}>
-        {cardData.map((card) => (
-          <DataCard
-            key={card.key}
-            title={card.title}
-            value={revenueData[card.key]}
-            total={targetDailyRevenue * (card.key === 'todays_revenue' ? 1 : parseInt(card.key))}
-            color={card.color}
-          />
-        ))}
-      </div>
-      <h2>Bottom Line Revenue Goals (30% Rev. Capture)</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
-        {cardData.map((card) => (
-          <DataCard
-            key={`30-percent-${card.key}`}
-            title={`${card.title}`}
-            value={(parseFloat(revenueData[card.key]) * 0.3).toString()}
-            total={targetDailyRevenue * (card.key === 'todays_revenue' ? 1 : parseInt(card.key)) * 0.3}
-            color={card.color}
-          />
-        ))}
-      </div>
+      {lendData && (
+        <div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginBottom: 20 }}>
+            {cardData.map((card) => (
+              <DataCard
+                key={card.key}
+                title={card.title}
+                value={lendData[card.key as keyof RevenueData]}
+                total={parseFloat(lendData.target_daily_revenue) * 
+                  (card.key === 'todays_revenue' ? 1 : parseInt(card.key))}
+                color={card.color}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {ourLendData && (
+        <div>
+          <h2>Bottom Line Revenue Goals (30% Rev. Capture)</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginBottom: 20 }}>
+            {cardData.map((card) => (
+              <DataCard
+                key={`30-percent-${card.key}`}
+                title={card.title}
+                value={ourLendData[card.key as keyof RevenueData]}
+                total={parseFloat(ourLendData.target_daily_revenue) * 
+                  (card.key === 'todays_revenue' ? 1 : parseInt(card.key))}
+                color={card.color}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, send_file, make_response, jsonify, url_for, Response, stream_with_context
+from flask import Flask, send_from_directory, send_file, make_response, jsonify, url_for, Response, stream_with_context, request
 from flask_cors import CORS
 import os
 from google.cloud import storage
@@ -277,6 +277,11 @@ def get_token_revenue_data():
 
 @app.route('/api/revenue_card_data', methods=['GET'])
 def get_revenue_card_data():
+
+    file_name = request.args.get('filename')
+    if not file_name:
+        return jsonify({'error': 'Filename parameter is required'}), 400
+
     bucket_name = 'cooldowns2'
     storage_client = storage.Client(credentials=get_credentials())
     bucket = storage_client.bucket(bucket_name)
@@ -285,7 +290,7 @@ def get_revenue_card_data():
     blobs = bucket.list_blobs()
 
     # Filter blobs that contain your specific file name
-    revenue_blobs = [blob for blob in blobs if 'lend_revenue_data_card' in blob.name.lower()]
+    revenue_blobs = [blob for blob in blobs if file_name == blob.name.lower()]
     
     if not revenue_blobs:
         return jsonify({'error': 'File not found'}), 404
