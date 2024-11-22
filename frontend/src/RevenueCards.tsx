@@ -19,7 +19,7 @@ interface DataCardProps {
   color: string;
 }
 
-const api_url = 'http://localhost:8000';
+const api_url = "http://localhost:8000";
 const LEND_FILE = 'lend_revenue_data_card.zip';
 const OUR_LEND_FILE = 'our_lend_revenue_data_card.zip';
 
@@ -164,7 +164,7 @@ const RevenueCards: React.FC = () => {
                 key={`30-percent-${card.key}`}
                 title={card.title}
                 value={ourLendData[card.key as keyof RevenueData]}
-                total={parseFloat(ourLendData.target_daily_revenue) * 
+                total={parseFloat(ourLendData.target_daily_revenue) * .3 *
                   (card.key === 'todays_revenue' ? 1 : parseInt(card.key))}
                 color={card.color}
               />
