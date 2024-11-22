@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const api_url = "http://localhost:8000";
 
@@ -40,7 +40,7 @@ const DeploymentRevenueChart: React.FC = () => {
 
   const colors = [
     '#e5989b', '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c',
-    '#d0ed57', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c'
+    '#d0ed57', '#83a6ed', '#8dd1e1', '#9b5de5', '#ffbe0b'
   ];
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -173,14 +173,16 @@ const DeploymentRevenueChart: React.FC = () => {
           <Tooltip content={<CustomTooltip />} />
           <Legend content={<CustomLegend />} />
           {deployments.map((deployment, index) => (
-            <Bar 
+            <Area
               key={deployment}
               yAxisId="left"
               dataKey={deployment}
               name={deployment}
               fill={colors[(index + 1) % colors.length]}
+              stroke={colors[(index + 1) % colors.length]}
               stackId="deployments"
               hide={!visibleLines[deployment]}
+              fillOpacity={0.6}
             />
           ))}
           <Line 

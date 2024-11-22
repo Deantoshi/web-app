@@ -340,7 +340,7 @@ def get_deployment_revenue():
     for entry in data:
         day = entry['day'].strftime('%Y-%m-%d')  # Convert to string
         if day not in grouped_data:
-            grouped_data[day] = {'day': day, 'total_aggregate_revenue': entry['total_aggregate_revenue']}
+            grouped_data[day] = {'day': day, 'total_aggregate_revenue': entry['total_aggregate_revenue'], 'daily_revenue': entry['daily_revenue']}
         deployment = entry['deployment']
         grouped_data[day][deployment] = entry['total_deployment_revenue']
 
