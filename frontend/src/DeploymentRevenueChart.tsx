@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const api_url = 'http://localhost:8000';
+const api_url = "http://localhost:8000";
 
 interface DeploymentData {
   day: string;
@@ -52,7 +52,7 @@ const DeploymentRevenueChart: React.FC = () => {
           <p style={{ margin: '0 0 5px', fontWeight: 'bold', color: 'white' }}>{`Date: ${label}`}</p>
           {payload.map((pld: any, index: number) => (
             <p key={index} style={{ color: pld.color, margin: '2px 0'}}>
-              {`${capitalize(pld.name.replace('_', ' '))}: $${Number(pld.value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+              {`${capitalize(pld.dataKey.replace('_', ' '))}: $${Number(pld.value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
             </p>
           ))}
         </div>
@@ -91,15 +91,15 @@ const DeploymentRevenueChart: React.FC = () => {
                 display: 'inline-block',
                 width: '10px',
                 height: '10px',
-                borderRadius: '50%',
+                borderRadius: key === 'total_aggregate_revenue' ? '0%' : '50%',
                 backgroundColor: colors[index % colors.length],
                 marginRight: '5px'
               }}
             />
             {
-            key === 'total_aggregate_revenue' 
-            ? 'Total' 
-            : capitalize(key.replace('_total_deployment_revenue', ''))
+              key === 'total_aggregate_revenue' 
+                ? 'Total Revenue' 
+                : capitalize(key.replace('_total_deployment_revenue', ''))
             }
           </li>
         ))}
@@ -127,7 +127,7 @@ const DeploymentRevenueChart: React.FC = () => {
   return (
     <div style={{ width: '100%', height: 400 }}>
       <ResponsiveContainer>
-        <LineChart
+        <ComposedChart
           data={visibleData}
           margin={{
             top: 5,
@@ -144,6 +144,7 @@ const DeploymentRevenueChart: React.FC = () => {
             tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
           />
           <YAxis 
+            yAxisId="left"
             tickFormatter={(value) => {
               if (value >= 1000000) {
                 return `$${(value / 1000000).toFixed(1)}M`.replace('.0M', 'M');
@@ -156,9 +157,34 @@ const DeploymentRevenueChart: React.FC = () => {
             domain={['dataMin', 'dataMax']}
             scale="linear"
           />
+          <YAxis 
+            yAxisId="right"
+            orientation="right"
+            tickFormatter={(value) => {
+              if (value >= 1000000) {
+                return `$${(value / 1000000).toFixed(1)}M`.replace('.0M', 'M');
+              } else if (value >= 1000) {
+                return `$${Math.round(value / 1000)}K`;
+              } else {
+                return `$${Math.round(value)}`;
+              }
+            }}
+          />
           <Tooltip content={<CustomTooltip />} />
           <Legend content={<CustomLegend />} />
+          {deployments.map((deployment, index) => (
+            <Bar 
+              key={deployment}
+              yAxisId="left"
+              dataKey={deployment}
+              name={deployment}
+              fill={colors[(index + 1) % colors.length]}
+              stackId="deployments"
+              hide={!visibleLines[deployment]}
+            />
+          ))}
           <Line 
+            yAxisId="right"
             type="monotone"
             dataKey="total_aggregate_revenue"
             name="Total Aggregate Revenue"
@@ -167,18 +193,7 @@ const DeploymentRevenueChart: React.FC = () => {
             strokeWidth={2}
             hide={!visibleLines['total_aggregate_revenue']}
           />
-          {deployments.map((deployment, index) => (
-            <Line 
-              key={deployment}
-              type="monotone"
-              dataKey={deployment}
-              name={deployment}
-              stroke={colors[(index + 1) % colors.length]}
-              dot={false}
-              hide={!visibleLines[deployment]}
-            />
-          ))}
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );
