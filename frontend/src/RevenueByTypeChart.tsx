@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const api_url = 'http://localhost:8000';
+const api_url = "http://localhost:8000";
 
 interface CumulativeRevenueData {
   day: string;
@@ -11,9 +11,9 @@ interface CumulativeRevenueData {
 }
 
 interface ChartDataPoint {
-    day: string;
-    [key: string]: string | number | undefined;
-  }
+  day: string;
+  [key: string]: string | number | undefined;
+}
 
 interface VisibleLines {
   [key: string]: boolean;
@@ -23,6 +23,7 @@ const RevenueByTypeChart: React.FC = () => {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [revenueTypes, setRevenueTypes] = useState<string[]>([]);
   const [visibleLines, setVisibleLines] = useState<VisibleLines>({});
+  const [showUSD, setShowUSD] = useState(false);
 
   useEffect(() => {
     axios.get<CumulativeRevenueData[]>(`${api_url}/api/revenue_by_type`)
@@ -31,23 +32,37 @@ const RevenueByTypeChart: React.FC = () => {
         const uniqueRevenueTypes = Array.from(new Set(sortedData.map(item => item.revenue_type)));
         setRevenueTypes(uniqueRevenueTypes);
 
-        // Process data to create a point for each day for each revenue type
         const processedData: ChartDataPoint[] = [];
         const dateSet = new Set(sortedData.map(item => item.day));
         const dates = Array.from(dateSet).sort();
 
         dates.forEach(date => {
-            const dataPoint: ChartDataPoint = { day: date };
-            uniqueRevenueTypes.forEach(type => {
-              const entry = sortedData.find(item => item.day === date && item.revenue_type === type);
-              dataPoint[type] = entry ? entry.cumulative_revenue : undefined;
-            });
-            processedData.push(dataPoint);
+          const dataPoint: ChartDataPoint = { day: date };
+          let totalRevenue = 0;
+          
+          // Calculate total revenue for this date
+          uniqueRevenueTypes.forEach(type => {
+            const entry = sortedData.find(item => item.day === date && item.revenue_type === type);
+            if (entry) {
+              totalRevenue += entry.cumulative_revenue;
+              // Store raw USD amount
+              dataPoint[`${type}_usd`] = entry.cumulative_revenue;
+            }
           });
+
+          // Calculate percentage for each type
+          uniqueRevenueTypes.forEach(type => {
+            const entry = sortedData.find(item => item.day === date && item.revenue_type === type);
+            const revenue = entry ? entry.cumulative_revenue : 0;
+            dataPoint[type] = totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0;
+          });
+          
+          processedData.push(dataPoint);
+        });
 
         setChartData(processedData);
         
-        const initialVisibility: VisibleLines = uniqueRevenueTypes.reduce((acc, type) => {
+        const initialVisibility = uniqueRevenueTypes.reduce((acc, type) => {
           acc[type] = true;
           return acc;
         }, {} as VisibleLines);
@@ -71,7 +86,11 @@ const RevenueByTypeChart: React.FC = () => {
           {payload.map((pld: any, index: number) => (
             pld.value !== undefined && (
               <p key={index} style={{ color: pld.color, margin: '2px 0'}}>
-                {`${capitalize(pld.name)}: $${Number(pld.value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+              {`${capitalize(pld.name.replace('_usd', ''))}: ${
+                showUSD 
+                  ? `$${Number(pld.value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                  : `${Number(pld.value).toFixed(2)}%`
+              }`}
               </p>
             )
           ))}
@@ -89,47 +108,59 @@ const RevenueByTypeChart: React.FC = () => {
   };
 
   const CustomLegend = () => (
-    <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-      {revenueTypes.map((type, index) => (
-        <li 
-          key={type} 
-          style={{ 
-            marginRight: '10px', 
-            cursor: 'pointer',
-            textDecoration: visibleLines[type] ? 'none' : 'line-through',
-            opacity: visibleLines[type] ? 1 : 0.5,
-            color: colors[index % colors.length],
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          onClick={() => handleLegendClick(type)}
-        >
-          <span 
-            style={{
-              display: 'inline-block',
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: colors[index % colors.length],
-              marginRight: '5px'
+    <div>
+      <div style={{ marginBottom: '10px', textAlign: 'center' }}>
+      </div>
+      <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {revenueTypes.map((type, index) => (
+          <li 
+            key={type} 
+            style={{ 
+              marginRight: '10px', 
+              cursor: 'pointer',
+              textDecoration: visibleLines[type] ? 'none' : 'line-through',
+              opacity: visibleLines[type] ? 1 : 0.5,
+              color: colors[index % colors.length],
+              display: 'flex',
+              alignItems: 'center',
             }}
-          />
-          {capitalize(type)}
-        </li>
-      ))}
-    </ul>
+            onClick={() => handleLegendClick(type)}
+          >
+            <span 
+              style={{
+                display: 'inline-block',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: colors[index % colors.length],
+                marginRight: '5px'
+              }}
+            />
+            {capitalize(type)}
+          </li>
+        ))}
+      </ul>
+      <div style={{ textAlign: 'center' }}>
+        <button
+            onClick={() => setShowUSD(!showUSD)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Show {showUSD ? 'Percentage' : 'USD'}
+        </button>
+      </div>
+    </div>
   );
 
   const visibleData = useMemo(() => {
     return chartData.filter(entry => 
-      revenueTypes.some(type => visibleLines[type] && entry[type] !== undefined)
+      revenueTypes.some(type => visibleLines[type] && entry[showUSD ? `${type}_usd` : type] !== undefined)
     );
-  }, [chartData, visibleLines, revenueTypes]);
+  }, [chartData, visibleLines, revenueTypes, showUSD]);
 
   return (
     <div style={{ width: '100%', height: 400 }}>
       <ResponsiveContainer>
-        <LineChart
+        <AreaChart
           data={visibleData}
           margin={{
             top: 5,
@@ -146,34 +177,32 @@ const RevenueByTypeChart: React.FC = () => {
             interval="preserveStartEnd"
             minTickGap={50}
           />
-          <YAxis 
-            tickFormatter={(value) => {
-              if (value >= 1000000) {
-                return `$${(value / 1000000).toFixed(1)}M`.replace('.0M', 'M');
-              } else if (value >= 1000) {
-                return `$${Math.round(value / 1000)}K`;
-              } else {
-                return `$${Math.round(value)}`;
-              }
-            }}
-            domain={['dataMin', 'dataMax']}
-            scale="linear"
-          />
+        <YAxis 
+          tickFormatter={(value) => showUSD 
+            ? value >= 1000000
+              ? `$${(value / 1000000).toFixed(0)}M`
+              : value >= 1000
+                ? `$${(value / 1000).toFixed(0)}K`
+                : `$${value}`
+            : `${value}%`}
+          domain={showUSD ? ['auto', 'auto'] : [0, 100]}
+          scale="linear"
+        />
           <Tooltip content={<CustomTooltip />} />
           <Legend content={<CustomLegend />} />
           {revenueTypes.map((type, index) => (
-            <Line 
+            <Area
               key={type}
               type="monotone"
-              dataKey={type}
+              dataKey={showUSD ? `${type}_usd` : type}
               name={type}
               stroke={colors[index % colors.length]}
-              dot={false}
+              fill={colors[index % colors.length]}
+              stackId="1"
               hide={!visibleLines[type]}
-              connectNulls
             />
           ))}
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
