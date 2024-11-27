@@ -13,7 +13,7 @@ import RevenueByTypeChart from './RevenueByTypeChart';
 import RewarderDataDisplay from './RewarderDataDisplay';
 import LoadingAnimation from './LoadingAnimation';
 
-const api_url = "http://localhost:8000";
+const api_url = "https://frontend-dot-internal-website-427620.uc.r.appspot.com";
 
 interface FileData {
   filename: string;

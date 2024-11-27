@@ -19,7 +19,7 @@ interface DataCardProps {
   color: string;
 }
 
-const api_url = "http://localhost:8000";
+const api_url = "https://frontend-dot-internal-website-427620.uc.r.appspot.com";
 const LEND_FILE = 'lend_revenue_data_card.zip';
 const OUR_LEND_FILE = 'our_lend_revenue_data_card.zip';
 

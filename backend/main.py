@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 KEYWORDS = ['aurelius', 'metis', 'ironclad', 'optimism', 'arbitrum', 'lore', 'fantom', 'base', 'aggregate']
 
 app = Flask(__name__)
-cors = CORS(app, origins='*')
-# CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
+# cors = CORS(app, origins='*')
+CORS(app, resources={r"/api/*": {"origins": "https://frontend-dot-internal-website-427620.uc.r.appspot.com"}})
 
 # Initialize GCP storage client
 credentials, project = default()
@@ -346,7 +346,7 @@ def get_deployment_revenue():
 
     # Convert to list of dictionaries
     result = list(grouped_data.values())
-    
+
     return jsonify(result)
 
 # # 7 Days MA

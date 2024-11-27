@@ -19,7 +19,7 @@ interface GroupedRewarderData {
   [protocol: string]: RewarderData[];
 }
 
-const api_url = 'http://localhost:8000';
+const api_url = 'https://frontend-dot-internal-website-427620.uc.r.appspot.com';
 
 const RewarderDataDisplay: React.FC = () => {
   const [data, setData] = useState<GroupedRewarderData | null>(null);

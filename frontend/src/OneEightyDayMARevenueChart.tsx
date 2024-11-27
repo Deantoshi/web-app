@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const api_url = 'http://localhost:8000';
+const api_url = 'https://frontend-dot-internal-website-427620.uc.r.appspot.com';
 
 interface MARevenueData {
   day: string;
